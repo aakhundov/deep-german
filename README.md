@@ -1,8 +1,8 @@
 This project is associated to the deep learning course. We are trying to build a model which can successfully learn to classify various German nouns into their gender-specific classes in the hopes
 that it will provide us with some insights into the underlying pattern of how the rules for classfying them according to grammar are constructed. 
 
-Architecture proposed to be used : RNNs + LSTMs / CNNs (if time permits).
-Tools proposed to be used : Python2/3 + TensorFlow + Keras(?)
+Architecture proposed : RNNs + LSTMs / CNNs (if time permits).
+Tools proposed : Python2/3 + TensorFlow + Keras(?)
 
 For an introduction into how Recurrent Neural Networks work and to build intuition towards them, follow the given links (it's better to go through the first 3 links in that order, followed by
 however you want to study the rest): 
