@@ -19,7 +19,7 @@ nouns_and_genders = {}
 gender_distribution = {}
 characters = []
 
-gender_labels = ["m", "f", "n", "pl"]
+allowed_gender_labels = ["m", "f", "n", "pl"]
 
 mixed_gender_words = 0
 unrecognized_labels = 0
@@ -31,16 +31,20 @@ print("Parsing nouns and genders...")
 # parsing nouns and their genders
 for i, nl in enumerate(all_noun_lines):
     if "{" in nl and "}" in nl:
+        # positions of { and } in raw noun line
         pos1, pos2 = nl.index("{"), nl.index("}")
+
+        # "noun" is the last word before opening {
         noun = nl[0:pos1 - 1].split(" ")[-1]
+        # "gender" is the label between { and }
         gender = nl[pos1+1:pos2]
 
         # TODO: any pre-processing and further filtering out
         # TODO: can be done here with "continue" operator
 
-        # only nouns with one of recognized
+        # only nouns with one of allowed
         # gender labels are considered
-        if gender in gender_labels:
+        if gender in allowed_gender_labels:
             # initializing gender counter
             if gender not in gender_distribution:
                 gender_distribution[gender] = 0
