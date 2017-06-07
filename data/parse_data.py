@@ -2,7 +2,7 @@ import textwrap
 
 
 print("Reading data...")
-with open("raw_words.txt") as f:
+with open("raw_words.txt", encoding="utf-8") as f:
     word_lines = f.readlines()
 
 print("Filtering raw nouns...")
@@ -11,7 +11,7 @@ all_noun_lines = [w for w in word_lines if w.endswith("noun\n")]
 
 print("Writing raw nouns...")
 # writing filtered lines into a file
-with open("raw_nouns.txt", "w+") as f:
+with open("raw_nouns.txt", "w+", encoding="utf-8") as f:
     f.writelines(all_noun_lines)
 
 
@@ -80,7 +80,7 @@ for i, nl in enumerate(all_noun_lines):
 print("Writing nouns and genders...")
 # writing cleaned-up list of nouns and
 # their genders into a file
-with open("clean_nouns.txt", "w+") as f:
+with open("clean_nouns.txt", "w+", encoding="utf-8") as f:
     for noun in sorted(nouns_and_genders.keys()):
         f.write("{0}\t{1}\n".format(
             noun, ",".join(sorted(nouns_and_genders[noun]))
