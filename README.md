@@ -30,3 +30,11 @@ however you want to study the rest):
 11. http://www.stanford.edu/class/cs20si/syllabus.html : Stanford's TENSORFLOW Course WITH NOTES.
 
 12. https://www.youtube.com/channel/UCMq6IdbXar_KtYixMS_wHcQ/videos : Videos supporting CS20SI - I haven't gone through all of them personally, so use your own discretion.
+
+13. https://danijar.com/what-is-a-tensorflow-session/ : What is a TensorFlow Session (essential, beginner)
+
+14. https://danijar.com/structuring-your-tensorflow-models/ : Structuring your TensorFlow models (recommended, medium)
+
+15. https://danijar.com/introduction-to-recurrent-networks-in-tensorflow/ : Introduction to RNN's in TensorFlow (must read, medium)
+
+16. https://danijar.com/variable-sequence-lengths-in-tensorflow/ : Variable sequence lenght in TensorFlow (essential, advanced)
