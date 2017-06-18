@@ -1,0 +1,26 @@
+					DeepGerman
+ 
+Learning a new language is always a stimulating and rewarding process. The 
+process becomes a tad bit tricky if one wishes to learn German. The pain of 
+remembering the gender associated with each word poses an obstacle in writing 
+as much as speaking the language for a new learner. Throw in the motley 
+combinations used with Akkusativ and Dativ cases and we have got a real problem 
+on our hands. If only there was an underlying pattern which could be exploited 
+helping us in remembering the gender of a word.
+
+Finding and extracting this underlying pattern in different German words in the 
+form of predicting the gender of a word is the goal of our project, DeepGerman. 
+Before striking out the case as completely hopeless, we must remember that there
+are indeed some identifiable patterns existing in German words, albeit on a 
+coarse level; for instance, words ending in ‘e’ are almost always feminine (die).
+There is a possibility that there are other hidden patterns existing on a meta 
+level which could easily be identified by a machine learning model. Recurrent 
+Neural Networks are naturally suitable for this type of task. They 
+exploit temporal dependencies existing in a sample and use it to classify that 
+sample into different categories. 
+
+We intend to use a dataset consisting of around 360K German words (provided 
+generously by dict.cc), train an LSTM-based RNN on the dataset to potentially 
+classify the words into four different categories (der, das, die: feminine, die:
+plural). The words have a roughly decent distribution of belonging to different 
+classes, which is promising to start with.
