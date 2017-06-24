@@ -1,7 +1,7 @@
-import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.rnn as rnn
 
+from datetime import datetime
 from tensorflow.examples.tutorials.mnist import input_data
 
 
@@ -10,7 +10,6 @@ from tensorflow.examples.tutorials.mnist import input_data
 DATA_FOLDER = "MNIST_data/"
 
 EPOCHS = 10
-TRAIN_STEPS = 550
 BATCH_SIZE = 100
 
 IMG_ROWS = 28
@@ -19,29 +18,24 @@ IMG_LABELS = 10
 
 TIME_STEPS = 28
 TIME_OFFSET = 0
-NUM_HIDDEN = 128
+NUM_LAYERS = 2
+NUM_HIDDEN = [256, 128]
+CELL_TYPE = rnn.GRUCell
+DROPOUT_RATE = 0.5
 LEARNING_RATE = 0.001
 
 
-# BUILDING GRAPH
-
-# setting up RNN cells
-cell = rnn.BasicLSTMCell(NUM_HIDDEN)
-
-# setting up placeholders
-xs = tf.placeholder(tf.float32, [None, IMG_ROWS * IMG_COLS])
-ys = tf.placeholder(tf.float32, [None, IMG_LABELS])
-
-# reshaping MNIST data in a square form
-images = tf.reshape(xs, [-1, IMG_ROWS, IMG_COLS])
+def echo(*message):
+    print("[{0}] ".format(datetime.now().time()), end="")
+    print(*message)
 
 
-def create_rnn_with_static_rnn():
+def get_last_output_from_static_rnn(input_images, rnn_cell):
     """Create RNN by means of tf.static_rnn() and return last output"""
-    image_slice = images[:, TIME_OFFSET: TIME_OFFSET + TIME_STEPS, :]
+    image_slice = input_images[:, TIME_OFFSET: TIME_OFFSET + TIME_STEPS, :]
 
     rnn_outputs, rnn_state = rnn.static_rnn(
-        cell, tf.unstack(image_slice, axis=1), dtype=tf.float32
+        rnn_cell, tf.unstack(image_slice, axis=1), dtype=tf.float32
     )
 
     last = rnn_outputs[-1]
@@ -49,12 +43,12 @@ def create_rnn_with_static_rnn():
     return last
 
 
-def create_rnn_with_dynamic_rnn():
+def get_last_output_from_dynamic_rnn(input_images, rnn_cell):
     """Create RNN by means of tf.dynamic_rnn() and return last output"""
-    image_slice = images[:, TIME_OFFSET: TIME_OFFSET + TIME_STEPS, :]
+    image_slice = input_images[:, TIME_OFFSET: TIME_OFFSET + TIME_STEPS, :]
 
     rnn_outputs, rnn_state = tf.nn.dynamic_rnn(
-        cell, image_slice, dtype=tf.float32
+        rnn_cell, image_slice, dtype=tf.float32
     )
 
     trans_outputs = tf.transpose(rnn_outputs, [1, 0, 2])
@@ -65,9 +59,36 @@ def create_rnn_with_dynamic_rnn():
     return tf.reshape(last_partition, [-1, NUM_HIDDEN])
 
 
+# BUILDING GRAPH
+
+echo("Creating placeholders...")
+
+# setting up placeholders
+xs = tf.placeholder(tf.float32, [None, IMG_ROWS * IMG_COLS])
+ys = tf.placeholder(tf.float32, [None, IMG_LABELS])
+dropout = tf.placeholder(tf.float32)
+
+echo("Creating cells...")
+
+# setting up RNN cells
+layer_cells = []
+for i in range(NUM_LAYERS):
+    layer_cell = CELL_TYPE(NUM_HIDDEN[i])
+    if DROPOUT_RATE < 1.0:
+        layer_cell = rnn.DropoutWrapper(layer_cell, output_keep_prob=1.0-dropout)
+    layer_cells.append(layer_cell)
+if len(layer_cells) > 1:
+    cell = rnn.MultiRNNCell(layer_cells)
+else:
+    cell = layer_cells[0]
+
+# reshaping MNIST data in a square form
+images = tf.reshape(xs, [-1, IMG_ROWS, IMG_COLS])
+
+echo("Creating network...")
+
 # fetching last output of the RNN
-print("Creating network...")
-last_output = create_rnn_with_dynamic_rnn()
+last_output = get_last_output_from_static_rnn(images, cell)
 
 # inference artifacts
 logits = tf.contrib.layers.fully_connected(
@@ -81,50 +102,59 @@ error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
 # training artifacts
 loss = tf.losses.softmax_cross_entropy(ys, logits)
 optimizer = tf.train.AdamOptimizer(LEARNING_RATE)
-print("Computing gradients...")
+
+echo("Computing gradients...")
+
+# minimization
 train = optimizer.minimize(loss)
 
 
 # PREPARING DATA
 
+echo("Preparing data...")
+
 # (download and) extract MNIST dataset
-print("Preparing data...")
 print()
 dataset = input_data.read_data_sets(DATA_FOLDER, one_hot=True)
 print()
-print("Training set:", dataset.train.images.shape[0])
-print("Validation set:", dataset.validation.images.shape[0])
-print("Testing set:", dataset.test.images.shape[0])
+echo("Training set:", dataset.train.images.shape[0])
+echo("Validation set:", dataset.validation.images.shape[0])
+echo("Testing set:", dataset.test.images.shape[0])
 print()
 
 
-# EXECUTING GRAPH
+# EXECUTING THE GRAPH
 
 with tf.Session() as sess:
-    print("Initializing variables...")
+    echo("Initializing variables...")
+
     sess.run(tf.global_variables_initializer())
 
-    print("Training...")
+    echo("Training...")
     print()
 
+    steps_per_epoch = dataset.train.images.shape[0] // BATCH_SIZE
+
     for epoch in range(EPOCHS):
-        for step in range(TRAIN_STEPS):
+        for step in range(steps_per_epoch):
             batch_xs, batch_ys = dataset.train.next_batch(BATCH_SIZE)
 
             sess.run(train, feed_dict={
                 xs: batch_xs,
-                ys: batch_ys
+                ys: batch_ys,
+                dropout: DROPOUT_RATE
             })
 
         val_error = sess.run(
             error,
             feed_dict={
                 xs: dataset.validation.images,
-                ys: dataset.validation.labels
+                ys: dataset.validation.labels,
+                dropout: 0.0
             }
         )
 
-        print('Epoch {:2d}  error {:3.2f}%'.format(
+        echo('Epoch {:2d}  error {:3.2f}%'.format(
             epoch + 1,
             100 * val_error
         ))
@@ -133,11 +163,12 @@ with tf.Session() as sess:
         error,
         feed_dict={
             xs: dataset.test.images,
-            ys: dataset.test.labels
+            ys: dataset.test.labels,
+            dropout: 0.0
         }
     )
 
     print()
-    print("Test error {:3.2f}% ".format(
+    echo("Test error {:3.2f}% ".format(
         100 * test_error
     ))
