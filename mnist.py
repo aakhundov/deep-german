@@ -71,16 +71,16 @@ dropout = tf.placeholder(tf.float32)
 echo("Creating cells...")
 
 # setting up RNN cells
-layer_cells = []
+layers = []
 for i in range(NUM_LAYERS):
-    layer_cell = CELL_TYPE(NUM_HIDDEN[i])
+    layer = CELL_TYPE(NUM_HIDDEN[i])
     if DROPOUT_RATE < 1.0:
-        layer_cell = rnn.DropoutWrapper(layer_cell, output_keep_prob=1.0-dropout)
-    layer_cells.append(layer_cell)
-if len(layer_cells) > 1:
-    cell = rnn.MultiRNNCell(layer_cells)
+        layer = rnn.DropoutWrapper(layer, output_keep_prob=1.0 - dropout)
+    layers.append(layer)
+if NUM_LAYERS > 1:
+    cell = rnn.MultiRNNCell(layers)
 else:
-    cell = layer_cells[0]
+    cell = layers[0]
 
 # reshaping MNIST data in a square form
 images = tf.reshape(xs, [-1, IMG_ROWS, IMG_COLS])
@@ -139,11 +139,13 @@ with tf.Session() as sess:
         for step in range(steps_per_epoch):
             batch_xs, batch_ys = dataset.train.next_batch(BATCH_SIZE)
 
-            sess.run(train, feed_dict={
+            _, l, e = sess.run([train, loss, error], feed_dict={
                 xs: batch_xs,
                 ys: batch_ys,
                 dropout: DROPOUT_RATE
             })
+
+            echo("Epoch", epoch, "Batch", step, "loss", l, "error", e)
 
         val_error = sess.run(
             error,
@@ -154,10 +156,12 @@ with tf.Session() as sess:
             }
         )
 
+        print()
         echo('Epoch {:2d}  error {:3.2f}%'.format(
             epoch + 1,
             100 * val_error
         ))
+        print()
 
     test_error = sess.run(
         error,
