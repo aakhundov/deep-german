@@ -51,6 +51,7 @@ with open("raw_nouns.txt", "w+", encoding="utf-8") as f:
 
 nouns_and_genders = {}
 gender_distribution = {}
+length_distribution = {}
 characters = []
 
 allowed_gender_labels = ["m", "f", "n", "pl"]
@@ -59,8 +60,7 @@ mixed_gender_words = 0
 unrecognized_labels = 0
 nouns_without_gender = 0
 filtered_out_nouns = 0
-min_noun_length = 1000
-max_noun_length = 0
+max_allowed_length = 30
 shortest_noun = ""
 longest_noun = ""
 
@@ -75,6 +75,11 @@ for i, nl in enumerate(all_noun_lines):
         noun = nl[0:pos1 - 1].split(" ")[-1].split("-")[-1]
         # "gender" is the label between { and }
         gender = nl[pos1+1:pos2]
+
+        # filtering out too long words
+        if len(noun) > max_allowed_length:
+            filtered_out_nouns += 1
+            continue
 
         # filtering out non-German nouns
         # according to criteria specified
@@ -92,7 +97,7 @@ for i, nl in enumerate(all_noun_lines):
 
             # a noun observed for the first time
             if noun not in nouns_and_genders:
-                nouns_and_genders[noun] = [gender]
+                nouns_and_genders[noun] = {gender: 1}
                 gender_distribution[gender] += 1
 
                 # registering the characters
@@ -100,20 +105,24 @@ for i, nl in enumerate(all_noun_lines):
                     if c not in characters:
                         characters.append(c)
 
-                # comparing the length
-                noun_length = len(noun)
-                if noun_length > max_noun_length:
-                    max_noun_length = noun_length
-                    longest_noun = noun
-                if noun_length < min_noun_length:
-                    min_noun_length = noun_length
-                    shortest_noun = noun
+                # updating length distribution
+                if len(noun) not in length_distribution:
+                    length_distribution[len(noun)] = 1
+                else:
+                    length_distribution[len(noun)] += 1
 
-            # same noun observed with different gender
-            elif gender not in nouns_and_genders[noun]:
-                if len(nouns_and_genders[noun]) == 1:
-                    mixed_gender_words += 1
-                nouns_and_genders[noun].append(gender)
+            # same noun observed more than once
+            else:
+                genders_so_far = nouns_and_genders[noun].keys()
+                # with the same gender
+                if gender in genders_so_far:
+                    nouns_and_genders[noun][gender] += 1
+                # with different gender
+                else:
+                    # second gender in a row
+                    if len(genders_so_far) == 1:
+                        mixed_gender_words += 1
+                    nouns_and_genders[noun][gender] = 1
                 gender_distribution[gender] += 1
         else:
             unrecognized_labels += 1
@@ -126,9 +135,13 @@ print("Writing nouns and genders...")
 # their genders into a file
 with open("clean_nouns.txt", "w+", encoding="utf-8") as f:
     for noun in sorted(nouns_and_genders.keys()):
-        gender = ",".join(sorted(nouns_and_genders[noun]))
+        gender_counts = ",".join([
+            str(nouns_and_genders[noun][g])
+            if g in nouns_and_genders[noun] else "0"
+            for g in allowed_gender_labels
+        ])
         f.write("{0}\t{1}\n".format(
-            noun.lower(), gender
+            noun.lower(), gender_counts
         ))
 
 
@@ -141,7 +154,6 @@ print("Unique nouns:", len(nouns_and_genders))
 print("Mixed gender nouns:", mixed_gender_words)
 print("Nouns without gender:", nouns_without_gender)
 print("Filtered out nouns:", filtered_out_nouns)
-print("Nouns length range:", min_noun_length, "-", max_noun_length)
 print("Nouns with unrecognized gender labels:", unrecognized_labels)
 print()
 
@@ -160,3 +172,9 @@ print("---------------------------------")
 print("\n".join(textwrap.wrap(
     "".join(sorted(characters)), 30
 )))
+
+print()
+print("Length distribution:")
+print("--------------------")
+for l in sorted(length_distribution.keys()):
+    print("{0}\t{1}".format(l, length_distribution[l]))
