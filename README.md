@@ -2,7 +2,7 @@ This project is associated to the deep learning course. We are trying to build a
 that it will provide us with some insights into the underlying pattern of how the rules for classfying them according to grammar are constructed. 
 
 Architecture proposed : RNNs + LSTMs / CNNs (if time permits).
-Tools proposed : Python2/3 + TensorFlow + Keras(?)
+Tools proposed : Python3 + TensorFlow1.0 + Keras(?)
 
 For an introduction into how Recurrent Neural Networks work and to build intuition towards them, follow the given links (it's better to go through the first 3 links in that order, followed by
 however you want to study the rest): 
