@@ -11,6 +11,8 @@ Datasets = collections.namedtuple(
 )
 
 
+# this is adapted from the original TensorFlow DataSet class in
+# tensorflow.contrib.learn.python.learn.datasets.mnist.DataSet
 class DataSet(object):
     def __init__(self, words, genders, seq_length):
         self._num_examples = words.shape[0]
