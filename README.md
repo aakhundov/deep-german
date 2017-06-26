@@ -38,3 +38,5 @@ however you want to study the rest):
 15. https://danijar.com/introduction-to-recurrent-networks-in-tensorflow/ : Introduction to RNN's in TensorFlow (must read, medium)
 
 16. https://danijar.com/variable-sequence-lengths-in-tensorflow/ : Variable sequence lenght in TensorFlow (essential, advanced)
+
+17. https://r2rt.com/written-memories-understanding-deriving-and-extending-the-lstm.html : Intuitions behind each LSTM cell variant, RNNs and much more.
