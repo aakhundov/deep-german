@@ -1,0 +1,100 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{DeepGerman}
+
+\author{Team Member 1\\
+{\tt\small first@i1.org}
+\and
+Team Member 2\\
+{\tt\small second@i1.org}
+\and
+Team Member 3\\
+{\tt\small third@i1.org}
+\and
+Team Member 4\\
+{\tt\small fourth@i1.org}
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%
+% Proposal I
+%
+\section*{Proposal I}
+\section{Introduction}
+    Learning a new language is always a stimulating and rewarding process. The process becomes a tad bit tricky if one wishes to learn German. The pain of remembering the gender associated with each word poses an obstacle in writing as much as speaking the language for a new learner. Throw in the motley combinations used with Akkusativ and Dativ cases and we have got a real problem on our hands. If only there was an underlying pattern which could be exploited helping us in remembering the gender of a word.
+    
+    Finding and extracting this underlying pattern in different German words in the form of predicting the gender of a word is the goal of our project, DeepGerman. Before striking out the case as completely hopeless, we must remember that there are indeed some identifiable patterns existing in German words, albeit on a coarse level; for instance, words ending in ‘e’ are almost always feminine (die). There is a possibility that there are other hidden patterns existing on a meta level which could easily be identified by a machine learning model.
+
+    \subsection{Related Work}
+        \begin{itemize}
+            \item Sentiment Analysis on word vectors (Ng et al., 2011) is the model which ties closely with our project. The words are converted into vector embeddings and a probability distribution over different sentiments is predicted. 
+            
+            \item LSTMs (Hochreiter and Schmidhuber, 1997) are able to overcome the difficulties of learning long-term temporal dependencies present in RNNs. Different variants on the original LSTM, viz., GRU (Cho et al., 2014), LSTM with peephole connections (Graves 2013) and others have been known to improve the performance on some tasks but not on others.
+            %Our approach incorporates the utilization of various lSTM-cell variants to predict a similar distribution over the four different classes.
+            \item We plan to experiment with different variants of LSTMs: (Original LSTM, GRUs and LSTMs with Peephole connections) along with vanilla RNNs and feedforward neural networks on our dataset and evaluate the performances obtained by different models. In terms of the task, we intend to predict one of the four different classes for each word (three genders: der, die or das and plural: die).
+            %\item[] $\dots$
+        \end{itemize}
+
+\section{Dataset}
+    \begin{itemize}
+        \item Since there is no publicly available dataset for German words (to th best of our knowledge), we intend to request dict.cc for their corpus of all the German words.
+        \item Based on the raw file, there are a total of around 360K words with one of the four possible labels (Some words have multiple labels associated with them as well).
+        %\item Does your data provide the labels necessary for training?
+        \item One of the possible problems we might encounter later revolves around the handling of extremely long words and the words which have multiple labels. For very long words, we plan to either remove them (they occupy an extremely small fraction of the entire dataset) or sacrifice more training time by keeping them as a part of the dataset.
+        \item The inputs will be German nouns/words of varying lengths and the output will be one of the four possible labels which represents the three genders as described in 1.1 (masculine: der, feminine: die, neutral: das) and plural (die) category. The input words are represented as one hot vectors of characters which are going to be fed into the network at different time-steps. The outputs are also a 4-dimensional one hot vector corresponding to each word. The loss will be computed by comparing the predicted one hot vector of labels with the ground truth one hot vector of labels.
+        %\item[] $\dots$
+    \end{itemize}
+
+\section{Methodology}
+    The problem can be broadly divided into three major stages:
+    \begin{itemize}
+        \item Preprocessing the raw data set of German words according to a number of criteria: extracting noun and gender information, filtering out very long words, etc. and converting the cleaned up data set into the appropriate one-hot representation (with the inputs broken down into multiple time steps).
+        \item Train different architectures of RNNs and feedforward NNs on the dataset from scratch using TensorFLow library. This is the step which is expected to be the most time-intensive as training part will require experimenting with different architectures and hyperparameter tuning.
+        \item Evaluate the results from various architectures and compare them.
+        The entire training process is expected to be carried out on standard quad-core CPUs, but we have a couple of GPUs (personally as well as on the server side) if needed.
+    \end{itemize}
+
+\section{Outcome}
+    The desired outcome of the project is to be able to predict the genders of different German words as precisely as possible. The ideal goal would be to extract some latent representations of the words which correlate with their labels.
+
+%
+% Proposal II
+%
+\section*{Proposal II}
+\setcounter{section}{0}
+
+\section{Introduction}
+    As a back-up project, we plan to participate in a recently launched Kaggle challenge, 
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{bib}
+}
+
+\end{document}
