@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{epigraph}
 
 % Include other packages here, before hyperref.
 
@@ -19,82 +20,88 @@
 \def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
 
+\setlength{\epigraphrule}{0pt}
+\setlength\epigraphwidth{.25\textwidth}
+
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifcvprfinal\pagestyle{empty}\fi
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{DeepGerman}
+\title{Proposal I: DeepGerman}
 
-\author{Team Member 1\\
-{\tt\small first@i1.org}
+\author{Adnan Akhundov\\
+{\tt\small adnan.akhundov@gmail.com}
 \and
-Team Member 2\\
-{\tt\small second@i1.org}
+Mesut Kuscu\\
+{\tt\small mesut.kuscu@tum.de}
 \and
-Team Member 3\\
-{\tt\small third@i1.org}
+Aysim Toker\\
+{\tt\small tokeraysim@gmail.com}
 \and
-Team Member 4\\
-{\tt\small fourth@i1.org}
+Rahul Bohare\\
+{\tt\small rahul.bohare@tum.de}
 }
 
 \maketitle
 %\thispagestyle{empty}
 
-%
-% Proposal I
-%
-\section*{Proposal I}
-\section{Introduction}
-    Learning a new language is always a stimulating and rewarding process. The process becomes a tad bit tricky if one wishes to learn German. The pain of remembering the gender associated with each word poses an obstacle in writing as much as speaking the language for a new learner. Throw in the motley combinations used with Akkusativ and Dativ cases and we have got a real problem on our hands. If only there was an underlying pattern which could be exploited helping us in remembering the gender of a word.
-    
-    Finding and extracting this underlying pattern in different German words in the form of predicting the gender of a word is the goal of our project, DeepGerman. Before striking out the case as completely hopeless, we must remember that there are indeed some identifiable patterns existing in German words, albeit on a coarse level; for instance, words ending in ‘e’ are almost always feminine (die). There is a possibility that there are other hidden patterns existing on a meta level which could easily be identified by a machine learning model.
+\section{Problem Definition}
+\epigraph{\textit{Life is too short to learn German}.}{Oscar Wilde}
+Learning a new language is always a stimulating and rewarding process. The process becomes a tad bit tricky if one wishes to learn German. The pain of remembering the gender associated with each word poses an obstacle in writing as much as speaking the language for a new learner.
+%Throw in the motley combinations used with Akkusativ and Dativ cases and we have got a real problem on our hands.
+If only there was an underlying pattern which could be exploited helping us in remembering the gender of a German noun.\par
+Finding and extracting this underlying pattern in different German nouns in the form of predicting the gender of a word is the goal of our project, \textbf{DeepGerman}. Before striking out the case as completely hopeless, we must remember that there are indeed some identifiable patterns existing in German nouns, albeit on a coarse level; for instance, words ending in {"}-e{"} are almost always feminine, and thus are associated with the article \textit{die}.
+There is a possibility that there are other hidden patterns existing on a meta level which could potentially be identified by a machine learning model.
 
-    \subsection{Related Work}
-        \begin{itemize}
-            \item Sentiment Analysis on word vectors (Ng et al., 2011) is the model which ties closely with our project. The words are converted into vector embeddings and a probability distribution over different sentiments is predicted. 
-            
-            \item LSTMs (Hochreiter and Schmidhuber, 1997) are able to overcome the difficulties of learning long-term temporal dependencies present in RNNs. Different variants on the original LSTM, viz., GRU (Cho et al., 2014), LSTM with peephole connections (Graves 2013) and others have been known to improve the performance on some tasks but not on others.
-            %Our approach incorporates the utilization of various lSTM-cell variants to predict a similar distribution over the four different classes.
-            \item We plan to experiment with different variants of LSTMs: (Original LSTM, GRUs and LSTMs with Peephole connections) along with vanilla RNNs and feedforward neural networks on our dataset and evaluate the performances obtained by different models. In terms of the task, we intend to predict one of the four different classes for each word (three genders: der, die or das and plural: die).
-            %\item[] $\dots$
-        \end{itemize}
+\section{Related Research}
+\begin{itemize}
+    \item LSTM networks \cite{lstm} are able to overcome the difficulties of learning long-term temporal dependencies present in RNNs. Different variants on the original LSTM - namely, GRU \cite{gru}, LSTM with peephole connections \cite{peephole}, and some others - have been known to improve the performance on some particular tasks, but not all of them.
+    \item Sentiment analysis on word vectors \cite{ng} is the model which ties closely with our project. The words are converted into vector embedding and a probability distribution over different sentiments is predicted.
+    \item In \cite{santos}, the authors have introduced a character-level embedding representation of the words, which might be relevant for this project.
+    \item In \cite{karpathy}, the authors have demonstrated some tools for visualization and analysis of the behaviour of recurrent neural networks. Some of those may be employed for evaluation of the obtained models' performance.
+\end{itemize}
 
-\section{Dataset}
-    \begin{itemize}
-        \item Since there is no publicly available dataset for German words (to th best of our knowledge), we intend to request dict.cc for their corpus of all the German words.
-        \item Based on the raw file, there are a total of around 360K words with one of the four possible labels (Some words have multiple labels associated with them as well).
-        %\item Does your data provide the labels necessary for training?
-        \item One of the possible problems we might encounter later revolves around the handling of extremely long words and the words which have multiple labels. For very long words, we plan to either remove them (they occupy an extremely small fraction of the entire dataset) or sacrifice more training time by keeping them as a part of the dataset.
-        \item The inputs will be German nouns/words of varying lengths and the output will be one of the four possible labels which represents the three genders as described in 1.1 (masculine: der, feminine: die, neutral: das) and plural (die) category. The input words are represented as one hot vectors of characters which are going to be fed into the network at different time-steps. The outputs are also a 4-dimensional one hot vector corresponding to each word. The loss will be computed by comparing the predicted one hot vector of labels with the ground truth one hot vector of labels.
-        %\item[] $\dots$
-    \end{itemize}
+\section{Approach}
+The desired outcome of the project is to be able to predict the genders of different German nouns as precisely as possible. The ideal goal would be to extract some latent representations of the words which correlate with their gender labels.\\
 
-\section{Methodology}
-    The problem can be broadly divided into three major stages:
-    \begin{itemize}
-        \item Preprocessing the raw data set of German words according to a number of criteria: extracting noun and gender information, filtering out very long words, etc. and converting the cleaned up data set into the appropriate one-hot representation (with the inputs broken down into multiple time steps).
-        \item Train different architectures of RNNs and feedforward NNs on the dataset from scratch using TensorFLow library. This is the step which is expected to be the most time-intensive as training part will require experimenting with different architectures and hyperparameter tuning.
-        \item Evaluate the results from various architectures and compare them.
-        The entire training process is expected to be carried out on standard quad-core CPUs, but we have a couple of GPUs (personally as well as on the server side) if needed.
-    \end{itemize}
+\subsection{Model}
+We plan to experiment with different variants of LSTM network (original LSTM's, GRU's and LSTM's with peephole connections) along with vanilla RNN's and feedforward neural networks on our dataset and evaluate the performance acheived by different models. In terms of the task, we intend to infer one of the three different classes for each noun. These are the three genders: masculine (\textit{der}), feminine (\textit{die}), and neutral (\textit{das}).\par
+The inputs to the model are German nouns of varying length and the output for each word will be one of the three possible labels representing the three genders as described above (masculine, feminine, or neutral). The input word is represented as a sequence of 30-dimensional one hot vectors of German characters, which are going to be fed into RNN at different time-steps. The output is a 3-dimensional one hot vector corresponding to the input word. Softmax loss will be computed by comparing the predicted one hot vector with the ground truth one hot vector of labels.
 
-\section{Outcome}
-    The desired outcome of the project is to be able to predict the genders of different German words as precisely as possible. The ideal goal would be to extract some latent representations of the words which correlate with their labels.
+\subsection{Framework}
+We intend to use Google TensorFlow library for implementing the experiments described in the above section. The out-of-the-box availability of multiple neural network training tools, in particular a multitude of RNN cells, in the library is going to streamline the experimentation and evaluation process. Also, CPU/GPU invariance of the library will allow achieving higher training efficiency.
 
-%
-% Proposal II
-%
-\section*{Proposal II}
-\setcounter{section}{0}
+\subsection{Data}
+To the best of our knowledge, there is no publicly available data set for German words. Therefore, we've requested dict.cc for their corpus of all German words, which is allowed to be used for research projects. Based on the initial analysis of the obtained raw file, we observe that there is a total of about 360 thousand nouns with one of the three gender labels assigned to each (some words have multiple gender labels associated with them).
+%\item Does your data provide the labels necessary for training?
+%One of the possible problems we might encounter later revolves around the handling of extremely long words and the words which have multiple labels. For very long words, we plan to either remove them (they occupy an extremely small fraction of the entire dataset) or sacrifice more training time by keeping them as a part of the dataset.
+\subsection{Methodology}
+We plan to divide the problem into three stages. Furthermore, as the time span of the project is 6 weeks, we assume the following work breakdnown structure:
+\begin{description}
+    \item [1 Week] Process the raw data set of German words according to a number of criteria: extract nouns, filter out non-relevant (e.g. very long) words, remove duplicates, summarize gender information, etc. and convert the cleaned up data set into the appropriate one-hot representation described above.
+    \item [4 Weeks] Train different architectures of RNN's and feedforward NN's on the dataset from scratch using TensorFlow library. This is the step which is expected to be the most time-intensive as training part will require experimenting with different network architectures as well as hyper-parameter tuning. The entire training process is expected to be carried out on standard quad-core CPU's, but there are also several GPU's available (on personal machines as well as on server side) if required.
+    \item [1 Week] Evaluate the results obtained from various RNN architectures, compare the results and publish them in a form of a presentation poster.
+\end{description}
 
-\section{Introduction}
-    As a back-up project, we plan to participate in a recently launched Kaggle challenge, 
+\begin{thebibliography}{9}
+\bibitem{lstm}
+Hochreiter, S., \& Schmidhuber, J. (1997). Long short-term memory. \textit{Neural computation}, 9(8), 1735-1780.
 
-{\small
-\bibliographystyle{ieee}
-\bibliography{bib}
-}
+\bibitem{gru}
+Cho, K., Van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H., \& Bengio, Y. (2014). Learning phrase representations using RNN encoder-decoder for statistical machine translation. \textit{arXiv preprint arXiv:1406.1078}.
+
+\bibitem{peephole}
+Gers, F. A., \& Schmidhuber, J. (2000). Recurrent nets that time and count. In \textit{Neural Networks, 2000. IJCNN 2000, Proceedings of the IEEE-INNS-ENNS International Joint Conference on} (Vol. 3, pp. 189-194). IEEE.
+
+\bibitem{ng}
+Maas, A. L., Daly, R. E., Pham, P. T., Huang, D., Ng, A. Y., \& Potts, C. (2011, June). Learning word vectors for sentiment analysis. In \textit{Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies-Volume 1} (pp. 142-150). Association for Computational Linguistics.
+
+\bibitem{santos}
+Santos, C. D., \& Zadrozny, B. (2014). Learning character-level representations for part-of-speech tagging. In \textit{Proceedings of the 31st International Conference on Machine Learning (ICML-14)} (pp. 1818-1826).
+
+\bibitem{karpathy}
+Karpathy, A., Johnson, J., \& Fei-Fei, L. (2015). Visualizing and understanding recurrent networks. \textit{arXiv preprint arXiv:1506.02078}.
+\end{thebibliography}
 
 \end{document}
