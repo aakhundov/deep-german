@@ -3,7 +3,7 @@ import textwrap
 
 min_allowed_noun_length = 2
 max_allowed_noun_length = 30
-allowed_gender_labels = ["m", "f", "n", "pl"]
+allowed_gender_labels = ["m", "f", "n"]
 special_german_chars = list("äöüß")
 
 raw_words_path = "./data/raw_words.txt"

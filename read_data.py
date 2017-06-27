@@ -4,7 +4,7 @@ import numpy as np
 
 clean_nouns_path = "./data/clean_nouns.txt"
 german_chars = "abcdefghijklmnopqrstuvwxyzßäöü"
-allowed_gender_labels = ["m", "f", "n", "pl"]
+allowed_gender_labels = ["m", "f", "n"]
 
 Datasets = collections.namedtuple(
     'Datasets', ['train', 'validation', 'test']
@@ -86,7 +86,7 @@ class DataSet(object):
 
 
 def read_data_sets(soft_labels=False, validation_ratio=0.1):
-    max_length, gender_labels = 30, 4
+    max_length, gender_labels = 30, 3
     codes = {c: i for i, c in enumerate(german_chars)}
 
     with open(clean_nouns_path, "r") as f:
@@ -99,7 +99,7 @@ def read_data_sets(soft_labels=False, validation_ratio=0.1):
 
     one_hot_words = np.zeros([len(lines), max_length, len(codes)], dtype=np.float32)
     one_hot_genders = np.zeros([len(lines), gender_labels], dtype=np.float32)
-    seq_length = np.zeros([len(lines)], dtype=np.int64)
+    seq_length = np.zeros([len(lines)], dtype=np.int32)
 
     for i, line in enumerate(lines):
         noun, genders = line.split("\t")
