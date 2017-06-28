@@ -4,7 +4,12 @@ import numpy as np
 
 clean_nouns_path = "./data/clean_nouns.txt"
 german_chars = "abcdefghijklmnopqrstuvwxyzßäöü"
+
+max_noun_length = 30
 allowed_gender_labels = ["m", "f", "n"]
+
+total_chars = len(german_chars)
+total_labels = len(allowed_gender_labels)
 
 Datasets = collections.namedtuple(
     'Datasets', ['train', 'validation', 'test']
@@ -86,7 +91,6 @@ class DataSet(object):
 
 
 def read_data_sets(soft_labels=False, validation_ratio=0.1):
-    max_length, gender_labels = 30, 3
     codes = {c: i for i, c in enumerate(german_chars)}
 
     with open(clean_nouns_path, "r") as f:
@@ -97,8 +101,9 @@ def read_data_sets(soft_labels=False, validation_ratio=0.1):
     np.random.shuffle(lines)
     np.random.set_state(rand_state)
 
-    one_hot_words = np.zeros([len(lines), max_length, len(codes)], dtype=np.float32)
-    one_hot_genders = np.zeros([len(lines), gender_labels], dtype=np.float32)
+    # +1 in 2nd and 3rd dimensions is cased by a terminal character in the end of a sequence
+    one_hot_words = np.zeros([len(lines), max_noun_length+1, total_chars+1], dtype=np.float32)
+    one_hot_genders = np.zeros([len(lines), total_labels], dtype=np.float32)
     seq_length = np.zeros([len(lines)], dtype=np.int32)
 
     for i, line in enumerate(lines):
@@ -108,8 +113,11 @@ def read_data_sets(soft_labels=False, validation_ratio=0.1):
         for j, c in enumerate(noun):
             one_hot_words[i, j, codes[c]] = 1.0
 
+        # adding terminal character after the last letter
+        one_hot_words[i, len(noun), total_chars] = 1.0
+
         if soft_labels:
-            total_counts = sum(gender_counts)
+            total_counts = 1.0 * sum(gender_counts)
             for j, g in enumerate(gender_counts):
                 one_hot_genders[i, j] = g / total_counts
         else:
@@ -132,12 +140,13 @@ def read_data_sets(soft_labels=False, validation_ratio=0.1):
     return Datasets(train=train, validation=validation, test=test)
 
 
-def reconstruct_batch(one_hot_words, one_hot_genders, seq_length):
+def reconstruct_batch(one_hot_words, one_hot_genders):
     words, genders = [], []
     for i in range(len(one_hot_words)):
         words.append("".join([
             german_chars[np.asscalar(np.argmax(one_hot_words[i, j]))]
-            for j in range(seq_length[i])
+            for j in range(max_noun_length)
+            if np.sum(one_hot_words[i, j, :total_chars]) > 0
         ]))
         genders.append({
             g: one_hot_genders[i, j]
@@ -172,7 +181,7 @@ if __name__ == "__main__":
     print()
 
     one_hot_xs, one_hot_ys, seq_len = sets.test.next_batch(20)
-    real_words, gender_maps = reconstruct_batch(one_hot_xs, one_hot_ys, seq_len)
+    real_words, gender_maps = reconstruct_batch(one_hot_xs, one_hot_ys)
 
     print("Reconstructed random mini-batch of 20 words:")
     print("--------------------------------------------")
