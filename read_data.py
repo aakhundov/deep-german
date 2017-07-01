@@ -123,7 +123,7 @@ def read_data_sets(soft_labels=False, validation_ratio=0.1):
         else:
             one_hot_genders[i, np.argmax(gender_counts)] = 1.0
 
-        seq_length[i] = len(noun)
+        seq_length[i] = len(noun) + 1
 
     test_size = int(len(lines) * 0.1)
     validation_size = int(len(lines) * validation_ratio)
