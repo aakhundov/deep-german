@@ -5,24 +5,23 @@ from datetime import datetime
 from read_data import read_data_sets
 
 
-DATA_FOLDER = "MNIST_data/"
-
 MAX_CHARACTERS = 31
 ALPHABET_SIZE = 31
 NUM_GENDERS = 3
 
 EPOCHS = 30
-BATCH_SIZE = 512
 
-NUM_LAYERS = 2
-NUM_HIDDEN = [256, 128]
-CELL_TYPE = rnn.BasicLSTMCell
-DROPOUT_RATE = 0.5
-LEARNING_RATE = 0.001
+BATCH_SIZE = 128               # 128, 256, 512
+NUM_LAYERS = 1                 # 1, 2, 3
+CELL_TYPE = rnn.BasicRNNCell   # rnn.BasicRNNCell, rnn.BasicLSTMCell, rnn.GRUCell, rnn.LSTMCell(use_peepholes=True)
+DROPOUT_RATE = 0.0             # 0.0, 0.5
+LEARNING_RATE = 1e-3           # 1e-2, 1e-3, 1e-4
+
+NUM_HIDDEN = [128, 128, 128]
 
 
 def echo(*message):
-    print("[{0}] ".format(datetime.now().time()), end="")
+    print("[{0}] ".format(datetime.now()), end="")
     print(*message)
 
 
@@ -61,6 +60,20 @@ def get_last_output_from_dynamic_rnn(input_words, seq_length, rnn_cell):
     return last
 
 
+print("cell type:", CELL_TYPE.__name__)
+print("hidden layers:", NUM_LAYERS)
+print("hidden units:", NUM_HIDDEN[:NUM_LAYERS])
+print("learning rate:", LEARNING_RATE)
+print("dropout rate:", DROPOUT_RATE)
+print("batch size:", BATCH_SIZE)
+print()
+
+model_path = "./results/models/{0}_{1}_{2}_{3}_{4}.ckpt".format(
+    CELL_TYPE.__name__, NUM_LAYERS,
+    LEARNING_RATE, DROPOUT_RATE, BATCH_SIZE
+)
+
+
 # BUILDING GRAPH
 
 echo("Creating placeholders...")
@@ -88,6 +101,7 @@ else:
 echo("Creating network...")
 
 # fetching last output of the RNN
+# dynamic_rnn is better for GPU runs
 last_output = get_last_output_from_dynamic_rnn(xs, seq, cell)
 
 # inference artifacts
@@ -125,6 +139,9 @@ print()
 
 # EXECUTING THE GRAPH
 
+saver = tf.train.Saver()
+best_val_error = 1.0
+
 with tf.Session() as sess:
     echo("Initializing variables...")
 
@@ -147,7 +164,7 @@ with tf.Session() as sess:
                 dropout: DROPOUT_RATE
             })
 
-            echo("Epoch", epoch, "Batch", step, "loss", l, "error", e * 100)
+            # echo("Epoch", epoch + 1, "Batch", step, "loss", l, "error", e * 100)
 
         val_error = sess.run(
             error,
@@ -159,12 +176,16 @@ with tf.Session() as sess:
             }
         )
 
-        # print()
+        if val_error < best_val_error:
+            best_val_error = val_error
+            saver.save(sess, model_path)
+
         echo('Epoch {:2d}  error {:3.2f}%'.format(
             epoch + 1,
             100 * val_error
         ))
-        # print()
+
+    saver.restore(sess, model_path)
 
     test_error = sess.run(
         error,
