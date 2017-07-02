@@ -49,7 +49,10 @@ class WordModel:
     def cell(self):
         layers = []
         for i in range(self.num_layers):
-            layer = self.cell_type(self.num_hidden[i])
+            if self.cell_type == rnn.LSTMCell:
+                layer = self.cell_type(self.num_hidden[i], use_peepholes=True)
+            else:
+                layer = self.cell_type(self.num_hidden[i])
             layer = rnn.DropoutWrapper(layer, output_keep_prob=1.0 - self.dropout)
             layers.append(layer)
         if self.num_layers > 1:
