@@ -123,7 +123,10 @@ best_epoch = 0
 best_val_error = 1.0
 saver = tf.train.Saver()
 
-with tf.Session() as sess:
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+
+with tf.Session(config=config) as sess:
     echo("Initializing variables...")
 
     sess.run(tf.global_variables_initializer())
