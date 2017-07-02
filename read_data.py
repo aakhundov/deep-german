@@ -93,7 +93,7 @@ class DataSet(object):
 def read_data_sets(soft_labels=False, validation_ratio=0.1):
     codes = {c: i for i, c in enumerate(german_chars)}
 
-    with open(clean_nouns_path, "r") as f:
+    with open(clean_nouns_path, "r", encoding="utf-8") as f:
         lines = [line[:-1] for line in f.readlines()]
 
     rand_state = np.random.get_state()
