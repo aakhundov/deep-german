@@ -2,10 +2,12 @@ import tensorflow as tf
 import tensorflow.contrib.rnn as rnn
 
 from datetime import datetime
+
 from read_data import read_data_sets
+from word_model import WordModel
 
 
-MAX_CHARACTERS = 31
+MAX_WORD_LEN = 31
 ALPHABET_SIZE = 31
 NUM_GENDERS = 3
 
@@ -23,41 +25,6 @@ NUM_HIDDEN = [128, 128, 128]
 def echo(*message):
     print("[{0}] ".format(datetime.now()), end="")
     print(*message)
-
-
-def get_last_output_from_static_rnn(input_words, seq_length, rnn_cell):
-    """Create RNN by means of tf.static_rnn() and return last output"""
-    rnn_outputs, rnn_state = rnn.static_rnn(
-        rnn_cell, tf.unstack(input_words, axis=1),
-        sequence_length=seq_length, dtype=tf.float32
-    )
-
-    indices = tf.stack([
-        tf.range(0, tf.shape(input_words)[0]),
-        seq_length - 1
-    ], axis=1)
-
-    last = tf.gather_nd(tf.stack(rnn_outputs, axis=1), indices)
-
-    return last
-
-
-def get_last_output_from_dynamic_rnn(input_words, seq_length, rnn_cell):
-    """Create RNN by means of tf.dynamic_rnn() and return last output"""
-    rnn_outputs, rnn_state = tf.nn.dynamic_rnn(
-        rnn_cell, input_words,
-        sequence_length=seq_length,
-        dtype=tf.float32
-    )
-
-    indices = tf.stack([
-        tf.range(0, tf.shape(input_words)[0]),
-        seq_length - 1
-    ], axis=1)
-
-    last = tf.gather_nd(rnn_outputs, indices)
-
-    return last
 
 
 print("cell type:", CELL_TYPE.__name__)
@@ -78,56 +45,25 @@ model_path = "./results/models/{0}_{1}_{2}_{3}_{4}.ckpt".format(
 
 echo("Creating placeholders...")
 
-# setting up placeholders
-xs = tf.placeholder(tf.float32, [None, MAX_CHARACTERS, ALPHABET_SIZE])
+xs = tf.placeholder(tf.float32, [None, MAX_WORD_LEN, ALPHABET_SIZE])
 ys = tf.placeholder(tf.float32, [None, NUM_GENDERS])
 seq = tf.placeholder(tf.int32, [None])
 dropout = tf.placeholder(tf.float32)
 
-echo("Creating cells...")
+echo("Creating model...")
 
-# setting up RNN cells
-layers = []
-for i in range(NUM_LAYERS):
-    layer = CELL_TYPE(NUM_HIDDEN[i])
-    if DROPOUT_RATE > 0.0:
-        layer = rnn.DropoutWrapper(layer, output_keep_prob=1.0 - dropout)
-    layers.append(layer)
-if NUM_LAYERS > 1:
-    cell = rnn.MultiRNNCell(layers)
-else:
-    cell = layers[0]
-
-echo("Creating network...")
-
-# fetching last output of the RNN
-# dynamic_rnn is better for GPU runs
-last_output = get_last_output_from_dynamic_rnn(xs, seq, cell)
-
-# inference artifacts
-logits = tf.contrib.layers.fully_connected(
-    last_output, NUM_GENDERS, activation_fn=None
+model = WordModel(
+    xs, ys, seq, dropout,
+    CELL_TYPE, NUM_LAYERS, NUM_HIDDEN,
+    tf.train.AdamOptimizer(LEARNING_RATE)
 )
-
-# evaluation artifacts
-mistakes = tf.not_equal(tf.argmax(ys, 1), tf.argmax(logits, 1))
-error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
-
-# training artifacts
-loss = tf.losses.softmax_cross_entropy(ys, logits)
-optimizer = tf.train.AdamOptimizer(LEARNING_RATE)
-
-echo("Computing gradients...")
-
-# minimization
-train = optimizer.minimize(loss)
 
 
 # PREPARING DATA
 
 echo("Preparing data...")
 
-# (download and) extract MNIST dataset
+# preparing words dataset
 dataset = read_data_sets()
 
 print()
@@ -157,17 +93,20 @@ with tf.Session() as sess:
         for step in range(steps_per_epoch):
             batch_xs, batch_ys, seq_len = dataset.train.next_batch(BATCH_SIZE)
 
-            _, l, e = sess.run([train, loss, error], feed_dict={
-                xs: batch_xs,
-                ys: batch_ys,
-                seq: seq_len,
-                dropout: DROPOUT_RATE
-            })
+            _, l, e = sess.run(
+                [model.training, model.loss, model.error],
+                feed_dict={
+                    xs: batch_xs,
+                    ys: batch_ys,
+                    seq: seq_len,
+                    dropout: DROPOUT_RATE
+                }
+            )
 
             # echo("Epoch", epoch + 1, "Batch", step, "loss", l, "error", e * 100)
 
-        val_error = sess.run(
-            error,
+        val_loss, val_error = sess.run(
+            [model.loss, model.error],
             feed_dict={
                 xs: dataset.validation.words,
                 ys: dataset.validation.genders,
@@ -180,15 +119,14 @@ with tf.Session() as sess:
             best_val_error = val_error
             saver.save(sess, model_path)
 
-        echo('Epoch {:2d}  error {:3.2f}%'.format(
-            epoch + 1,
-            100 * val_error
+        echo('Epoch {:2d}:  error {:3.2f}%  loss {:.4f}'.format(
+            epoch + 1, 100 * val_error, val_loss
         ))
 
     saver.restore(sess, model_path)
 
-    test_error = sess.run(
-        error,
+    test_loss, test_error = sess.run(
+        [model.loss, model.error],
         feed_dict={
             xs: dataset.test.words,
             ys: dataset.test.genders,
@@ -198,6 +136,6 @@ with tf.Session() as sess:
     )
 
     print()
-    echo("Test error {:3.2f}% ".format(
-        100 * test_error
+    echo('Test Set:  error {:3.2f}%  loss {:.4f}'.format(
+        100 * test_error, test_loss
     ))
