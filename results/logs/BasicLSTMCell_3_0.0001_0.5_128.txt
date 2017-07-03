@@ -1,0 +1,34 @@
+Epoch  1:  error 33.58%  loss 0.7582
+Epoch  2:  error 27.48%  loss 0.6459
+Epoch  3:  error 25.13%  loss 0.5948
+Epoch  4:  error 23.62%  loss 0.5589
+Epoch  5:  error 21.92%  loss 0.5204
+Epoch  6:  error 20.23%  loss 0.4849
+Epoch  7:  error 18.86%  loss 0.4564
+Epoch  8:  error 17.93%  loss 0.4334
+Epoch  9:  error 16.68%  loss 0.4096
+Epoch 10:  error 15.76%  loss 0.3928
+Epoch 11:  error 15.11%  loss 0.3726
+Epoch 12:  error 14.06%  loss 0.3536
+Epoch 13:  error 13.46%  loss 0.3434
+Epoch 14:  error 12.87%  loss 0.3288
+Epoch 15:  error 12.40%  loss 0.3206
+Epoch 16:  error 11.74%  loss 0.3055
+Epoch 17:  error 11.14%  loss 0.2933
+Epoch 18:  error 11.16%  loss 0.2896
+Epoch 19:  error 10.35%  loss 0.2757
+Epoch 20:  error 9.97%  loss 0.2689
+Epoch 21:  error 9.77%  loss 0.2640
+Epoch 22:  error 9.32%  loss 0.2511
+Epoch 23:  error 9.07%  loss 0.2469
+Epoch 24:  error 8.89%  loss 0.2409
+Epoch 25:  error 8.53%  loss 0.2367
+Epoch 26:  error 8.36%  loss 0.2299
+Epoch 27:  error 8.17%  loss 0.2256
+Epoch 28:  error 8.06%  loss 0.2207
+Epoch 29:  error 7.90%  loss 0.2178
+Epoch 30:  error 7.58%  loss 0.2111
+
+Best epoch: 30
+
+Test Set:  error 7.53%  loss 0.2138
