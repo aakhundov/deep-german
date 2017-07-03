@@ -4,6 +4,7 @@ import numpy as np
 
 clean_nouns_path = "./data/clean_nouns.txt"
 german_chars = "abcdefghijklmnopqrstuvwxyzßäöü"
+codes = {c: i for i, c in enumerate(german_chars)}
 
 max_noun_length = 30
 allowed_gender_labels = ["m", "f", "n"]
@@ -91,8 +92,6 @@ class DataSet(object):
 
 
 def read_data_sets(soft_labels=False, validation_ratio=0.1):
-    codes = {c: i for i, c in enumerate(german_chars)}
-
     with open(clean_nouns_path, "r", encoding="utf-8") as f:
         lines = [line[:-1] for line in f.readlines()]
 
@@ -154,6 +153,19 @@ def reconstruct_batch(one_hot_words, one_hot_genders):
         })
 
     return words, genders
+
+
+def nouns_to_one_hot(nouns):
+    one_hot_words = np.zeros([len(nouns), max_noun_length+1, total_chars+1], dtype=np.float32)
+    seq_length = np.zeros([len(nouns)], dtype=np.int32)
+
+    for i, noun in enumerate(nouns):
+        for j, c in enumerate(noun):
+            one_hot_words[i, j, codes[c]] = 1.0
+        one_hot_words[i, len(noun), total_chars] = 1.0
+        seq_length[i] = len(noun) + 1
+
+    return one_hot_words, seq_length
 
 
 if __name__ == "__main__":
