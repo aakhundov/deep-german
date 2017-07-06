@@ -18,8 +18,8 @@ def lazy_property(func):
     return decorator
 
 
-class WordModel:
-    """TensorFlow model for inferring a class from character-level one-hot representation of a word."""
+class RNNWordModel:
+    """RNN-based TF model for inferring a class from character-level one-hot representation of a word."""
 
     def __init__(self, inputs, targets, seq_length, dropout,
                  cell_type, num_layers, num_hidden, optimizer):

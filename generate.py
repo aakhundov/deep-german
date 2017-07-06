@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.contrib.rnn as rnn
 
 from read_data import nouns_to_one_hot
-from word_model import WordModel
+from rnn_word_model import RNNWordModel
 
 
 MAX_WORD_LEN = 31
@@ -67,7 +67,7 @@ ys = tf.placeholder(tf.float32, [None, NUM_GENDERS])
 seq = tf.placeholder(tf.int32, [None])
 dropout = tf.placeholder(tf.float32)
 
-model = WordModel(
+model = RNNWordModel(
     xs, ys, seq, dropout,
     CELL_TYPE, NUM_LAYERS, NUM_HIDDEN,
     tf.train.AdamOptimizer(LEARNING_RATE)

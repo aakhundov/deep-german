@@ -1,11 +1,11 @@
 import sys
+import numpy as np
 import tensorflow as tf
-import tensorflow.contrib.rnn as rnn
 
 from datetime import datetime
 
 from read_data import read_data_sets
-from word_model import WordModel
+from mlp_word_model import MLPWordModel
 
 
 MAX_WORD_LEN = 31
@@ -16,13 +16,13 @@ EPOCHS = 30
 
 # the hyperparameters below are
 # configurable with CL arguments
-BATCH_SIZE = 128       # -batch 128, 256, or 512
-NUM_LAYERS = 1         # -layers 1, 2, or 3
-RNN_CELL = "rnn"       # -cell "rnn", "lstm", "gru", or "peephole"
-DROPOUT_RATE = 0.0     # -dropout 0.0 or 0.5
-LEARNING_RATE = 1e-3   # -learning 1e-2, 1e-3, or 1e-4
+BATCH_SIZE = 128           # -batch 128, 256, or 512
+NUM_LAYERS = 3             # -layers 1, 2, or 3
+ACTIVATION = tf.nn.relu    # -activation "sigmoid", "tanh", or "relu"
+DROPOUT_RATE = 0.0         # -dropout 0.0 or 0.5
+LEARNING_RATE = 1e-3       # -learning 1e-2, 1e-3, or 1e-4
 
-NUM_HIDDEN = [128, 128, 128]
+NUM_HIDDEN = [512, 256, 128]
 
 
 def echo(*args):
@@ -45,8 +45,8 @@ while len(sys.argv) > 1:
         BATCH_SIZE = int(sys.argv[1]); del sys.argv[1]
     elif option == "-layers":
         NUM_LAYERS = int(sys.argv[1]); del sys.argv[1]
-    elif option == "-cell":
-        RNN_CELL = sys.argv[1]; del sys.argv[1]
+    elif option == "-activation":
+        ACTIVATION = getattr(tf.nn, sys.argv[1]); del sys.argv[1]
     elif option == "-dropout":
         DROPOUT_RATE = float(sys.argv[1]); del sys.argv[1]
     elif option == "-learning":
@@ -55,20 +55,8 @@ while len(sys.argv) > 1:
         print(sys.argv[0], ": invalid option", option)
         sys.exit(1)
 
-if RNN_CELL == "rnn":
-    CELL_TYPE = rnn.BasicRNNCell
-elif RNN_CELL == "lstm":
-    CELL_TYPE = rnn.BasicLSTMCell
-elif RNN_CELL == "gru":
-    CELL_TYPE = rnn.GRUCell
-elif RNN_CELL == "peephole":
-    CELL_TYPE = rnn.LSTMCell
-else:
-    raise Exception("Unrecognized cell type:", RNN_CELL)
-
-
-model_name = "{0}_{1}_{2}_{3}_{4}".format(
-    CELL_TYPE.__name__, NUM_LAYERS,
+model_name = "{0}_{1}_{2}_{3}_{4}_{5}".format(
+    "MLP", NUM_LAYERS, ACTIVATION.__name__,
     LEARNING_RATE, DROPOUT_RATE, BATCH_SIZE
 )
 
@@ -76,8 +64,8 @@ log_path = "./results/logs/" + model_name + ".txt"
 model_path = "./results/models/" + model_name + ".ckpt"
 log_file = open(log_path, "w")
 
-print("cell type:", CELL_TYPE.__name__)
 print("hidden layers:", NUM_LAYERS)
+print("activation:", ACTIVATION.__name__)
 print("hidden units:", NUM_HIDDEN[:NUM_LAYERS])
 print("learning rate:", LEARNING_RATE)
 print("dropout rate:", DROPOUT_RATE)
@@ -89,16 +77,14 @@ print()
 
 echo("Creating placeholders...")
 
-xs = tf.placeholder(tf.float32, [None, MAX_WORD_LEN, ALPHABET_SIZE])
+xs = tf.placeholder(tf.float32, [None, MAX_WORD_LEN * ALPHABET_SIZE])
 ys = tf.placeholder(tf.float32, [None, NUM_GENDERS])
-seq = tf.placeholder(tf.int32, [None])
 dropout = tf.placeholder(tf.float32)
 
 echo("Creating model...")
 
-model = WordModel(
-    xs, ys, seq, dropout,
-    CELL_TYPE, NUM_LAYERS, NUM_HIDDEN,
+model = MLPWordModel(
+    xs, ys, dropout, ACTIVATION, NUM_LAYERS, NUM_HIDDEN,
     tf.train.AdamOptimizer(LEARNING_RATE)
 )
 
@@ -140,13 +126,13 @@ with tf.Session(config=config) as sess:
     for epoch in range(1, EPOCHS+1):
         for step in range(steps_per_epoch):
             batch_xs, batch_ys, seq_len = dataset.train.next_batch(BATCH_SIZE)
+            batch_xs = np.reshape(batch_xs, [-1, MAX_WORD_LEN * ALPHABET_SIZE])
 
             sess.run(
                 model.training,
                 feed_dict={
                     xs: batch_xs,
                     ys: batch_ys,
-                    seq: seq_len,
                     dropout: DROPOUT_RATE
                 }
             )
@@ -154,9 +140,8 @@ with tf.Session(config=config) as sess:
         val_loss, val_error = sess.run(
             [model.loss, model.error],
             feed_dict={
-                xs: dataset.validation.words,
+                xs: np.reshape(dataset.validation.words, [-1, MAX_WORD_LEN * ALPHABET_SIZE]),
                 ys: dataset.validation.genders,
-                seq: dataset.validation.seq_length,
                 dropout: 0.0
             }
         )
@@ -175,9 +160,8 @@ with tf.Session(config=config) as sess:
     test_loss, test_error = sess.run(
         [model.loss, model.error],
         feed_dict={
-            xs: dataset.test.words,
+            xs: np.reshape(dataset.test.words, [-1, MAX_WORD_LEN * ALPHABET_SIZE]),
             ys: dataset.test.genders,
-            seq: dataset.test.seq_length,
             dropout: 0.0
         }
     )
