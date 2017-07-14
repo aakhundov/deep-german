@@ -14,7 +14,7 @@ NUM_GENDERS = 3
 
 # parsing hyperparameters from model name
 
-model_name = "BasicLSTMCell_1_0.01_0.5_128"
+model_name = "BasicLSTMCell_2_0.01_0.5_128"
 
 if len(sys.argv) > 1:
     model_name = sys.argv[1]

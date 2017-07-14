@@ -19,16 +19,16 @@ german_chars = "abcdefghijklmnopqrstuvwxyzßäöü"
 total_chars = len(german_chars)
 
 noun_endings = {
-    "masculine": ["ant", "anz", "ast", "er", "ich", "eich",
+    "masculine": ["ant", "ast", "er", "ich", "eich",
                   "ig", "eig", "ling", "or", "us", "ismus"],
-    "feminine": ["anz", "e", "ei", "enz", "heit", "ie", "in", "ik", "keit",
-                 "nis", "schaft", "sion", "sis", "tion", "tät", "ung", "ur"],
-    "neutral": ["a", "chen", "lein", "en", "il", "in", "ing",
-                "it", "ma", "ment", "nis", "tum", "um", ]
+    "feminine": ["anz", "e", "ei", "enz", "heit", "ie", "ik", "keit",
+                 "schaft", "sion", "sis", "tion", "tät", "ung", "ur"],
+    "neutral": ["chen", "lein", "en", "il", "ing",
+                "ma", "ment", "nis", "tum", "um", ]
 }
 
 
-def generate_nouns(noun_ending, count=1, min_len=1, max_len=60):
+def generate_nouns(noun_ending, count=1, min_len=1, max_len=30):
     end_len = len(noun_ending)
     min_len = max(min_len, end_len+1)
     max_len = max(max_len, min_len+1)
@@ -84,7 +84,7 @@ with tf.Session() as sess:
     saver.restore(sess, model_path)
 
     for gender in noun_endings.keys():
-        print(gender)
+        print(gender, "endings")
         print("-------------------------------------")
         for ending in noun_endings[gender]:
             nouns = generate_nouns(

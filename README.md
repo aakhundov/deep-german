@@ -1,42 +1,56 @@
-This project is associated to the deep learning course. We are trying to build a model which can successfully learn to classify various German nouns into their gender-specific classes in the hopes
-that it will provide us with some insights into the underlying pattern of how the rules for classfying them according to grammar are constructed. 
+DeepGerman project is an attempt to infer the gender (masculine, feminine, or neutral) of a German noun from its raw character-level representation. The project is implemented using TensorFlow v1.0. Several RNN and MLP models of different architecture were trained and evaluated manually (by entering "words") and automatically (by randomly generated "words"). The model achieving 3.76% error on a test set (2-layer LSTM with 128 hidden units in each layer, trained with dropout and batch size of 128) is available in "results/models" folder.
 
-Architecture proposed : RNNs + LSTMs / CNNs (if time permits).
-Tools proposed : Python3 + TensorFlow1.0 + Keras(?)
+Runnable scripts:
+* **rnn_deep_german.py** - configurable RNN trainer (CL arguments specified in the script).
+* **mlp_deep_german.py** - configurable MLP trainer (CL arguments specified in the script).
+* **evaluate_manual.py** - manual model evaluation by entering a word and observing the inferred gender probabilities.
+* **evaluate_auto.py** - automatic model evaluation by generating multiple random words of variable length with fixed endings corresponding to a given gender (e.g. "-ung" for feminine) and observing the statistics of inferred gender classes for each ending.
 
-For an introduction into how Recurrent Neural Networks work and to build intuition towards them, follow the given links (it's better to go through the first 3 links in that order, followed by
-however you want to study the rest): 
+Below are the results of automatic evaluation of the "BasicLSTMCell_2_0.01_0.5_128" model available in "results/model" folder. 10,000 random words have been generated for each of the endings. The numbers in three columns show the percentage of the words classified as masculine, feminine, and neutral for each of the endings:
 
-1. http://colah.github.io/posts/2015-08-Understanding-LSTMs/ : First Resource - START HERE!
+~~~~
+masculine endings
+-------------------------------------
+-ant       96.36     1.96      1.68      
+-ast       93.41     3.84      2.75      
+-er        89.72     2.35      7.93      
+-ich       75.00     0.28      24.72     
+-eich      89.94     0.15      9.91      
+-ig        75.64     0.10      24.26     
+-eig       75.27     0.25      24.48     
+-ling      53.68     0.06      46.26     
+-or        83.17     2.13      14.70     
+-us        91.32     2.92      5.76      
+-ismus     100.00    0.00      0.00      
 
-2. https://medium.com/@camrongodbout/recurrent-neural-networks-for-beginners-7aca4e933b82 : To build on the previous post; will serve as appurtenance to the concepts built after reading the previous post.
+feminine endings
+-------------------------------------
+-anz       22.27     76.52     1.21      
+-e         18.22     75.42     6.36      
+-ei        28.23     39.34     32.43     
+-enz       4.03      93.92     2.05      
+-heit      10.33     89.29     0.38      
+-ie        6.68      90.36     2.96      
+-ik        22.29     67.71     10.00     
+-keit      46.30     53.56     0.14      
+-schaft    2.46      97.22     0.32      
+-sion      0.08      98.62     1.30      
+-sis       5.16      68.50     26.34     
+-tion      0.78      97.34     1.88      
+-tät       6.87      85.96     7.17      
+-ung       7.38      91.13     1.49      
+-ur        35.58     59.64     4.78      
 
-3. http://www.yuthon.com/2016/10/30/Notes-for-CS231n-RNN/ : These are the notes from Stanford's CS231n for Recurrent Neural Networks. There is a YouTube video linked at the top of this webpage which is brilliant for LSTMs.
-
-4. http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/ : INTRODUCTION - Part 1 of a 4 part series on practical approach towards RNNs.
-
-5. http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/ : IMPLEMENTING RNNs WITH PYTHON, NUMPY & THEANO - Part 2.
-
-6. http://www.wildml.com/2015/10/recurrent-neural-networks-tutorial-part-3-backpropagation-through-time-and-vanishing-gradients/ : BACKPROP THROUGH TIME - Part 3.
-
-7. http://www.wildml.com/2015/10/recurrent-neural-network-tutorial-part-4-implementing-a-grulstm-rnn-with-python-and-theano/ : IMPLEMENTING A LSTM WITH PYTHON & THEANO - PART 4.
-
-8. https://www.tensorflow.org/tutorials/recurrent : OFFICIAL GUIDE TO START IMPLEMENTING RNNs WITH TENSORFLOW.
-
-9. http://web.stanford.edu/class/cs224n/syllabus.html : Stanford's CS224n Course for NLP with RNNs. 
-
-10. https://www.youtube.com/playlist?list=PLlJy-eBtNFt4CSVWYqscHDdP58M3zFHIG : CS224d Lecture Videos - THE BEST THING FOR VIDEO PEOPLE.
-
-11. http://www.stanford.edu/class/cs20si/syllabus.html : Stanford's TENSORFLOW Course WITH NOTES.
-
-12. https://www.youtube.com/channel/UCMq6IdbXar_KtYixMS_wHcQ/videos : Videos supporting CS20SI - I haven't gone through all of them personally, so use your own discretion.
-
-13. https://danijar.com/what-is-a-tensorflow-session/ : What is a TensorFlow Session (essential, beginner)
-
-14. https://danijar.com/structuring-your-tensorflow-models/ : Structuring your TensorFlow models (recommended, medium)
-
-15. https://danijar.com/introduction-to-recurrent-networks-in-tensorflow/ : Introduction to RNN's in TensorFlow (must read, medium)
-
-16. https://danijar.com/variable-sequence-lengths-in-tensorflow/ : Variable sequence lenght in TensorFlow (essential, advanced)
-
-17. https://r2rt.com/written-memories-understanding-deriving-and-extending-the-lstm.html : Intuitions behind each LSTM cell variant, RNNs and much more.
+neutral endings
+-------------------------------------
+-chen      3.21      0.00      96.79     
+-lein      2.53      0.35      97.12     
+-en        18.67     0.53      80.80     
+-il        13.78     0.16      86.06     
+-ing       10.73     2.13      87.14     
+-ma        1.56      23.44     75.00     
+-ment      7.92      0.11      91.97     
+-nis       12.43     21.68     65.89     
+-tum       2.80      0.07      97.13     
+-um        17.71     0.24      82.05     
+~~~~
