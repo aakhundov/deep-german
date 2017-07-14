@@ -1,4 +1,4 @@
-DeepGerman project is an attempt to infer the gender (masculine, feminine, or neutral) of a German noun from its raw character-level representation. The project is implemented using TensorFlow. Several RNN and MLP models of different architecture were trained and evaluated manually (by entering "words") and automatically (by randomly generated "words"). RNN input is one-hot representation of subsequent word characters at each time step. MLP input is concatenated one-hot vectors of all characters. The output of both model types is three-class softmax for three genders.
+DeepGerman project is an attempt to infer the gender (masculine, feminine, or neutral) of a German noun from its raw character-level representation. Several RNN and MLP models of different architecture were trained and evaluated manually (by entering "words") and automatically (by randomly generated "words"). RNN input is one-hot representation of subsequent word characters at each time step. MLP input is concatenated one-hot vectors of all characters. The output of both model types is three-class softmax for three genders. The project is implemented using TensorFlow.
 
 Runnable scripts:
 * **rnn_deep_german.py** - configurable RNN trainer (CL arguments specified in the script).
@@ -6,7 +6,7 @@ Runnable scripts:
 * **evaluate_manual.py** - manual model evaluation by entering a word and observing the inferred gender probabilities.
 * **evaluate_auto.py** - automatic model evaluation by generating multiple random words of variable length with fixed endings corresponding to a given gender (e.g. "-ung" for feminine) and observing the statistics of inferred gender classes for each ending.
 
-The model achieving 3.76% error (2-layer LSTM with 128 hidden units in each layer, trained with dropout and batch size of 128) is available in "results/models" folder. The results of automatic evaluation of this model (obtained by running **evaluate_auto.py**) are shown below. 10,000 random words of varying length have been generated per gender ending. The numbers in three columns of the table show the percentage of the words classified as masculine, feminine, and neutral for each of the endings:
+The model achieving 96.24% classification accuracy on the test set  - 2-layer LSTM with 128 hidden units in each layer, trained with dropout and batch size of 128 - is available in "results" folder (training log in "/results/logs", TF checkpoint in "/results/models"). The results of automatic evaluation of this model (obtained by running **evaluate_auto.py**) are shown below. 10,000 random words of varying length have been generated per gender ending. The numbers in three columns of the table show the percentage of the words classified as masculine, feminine, and neutral for each of the endings:
 
 ~~~~
 masculine endings
