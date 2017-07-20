@@ -2,7 +2,7 @@ import collections
 import numpy as np
 
 
-clean_nouns_path = "./data/clean_nouns.txt"
+clean_nouns_path = "./data/nouns.txt"
 german_chars = "abcdefghijklmnopqrstuvwxyzßäöü"
 codes = {c: i for i, c in enumerate(german_chars)}
 
