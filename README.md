@@ -1,7 +1,8 @@
-DeepGerman project is an attempt to infer the gender (masculine, feminine, or neutral) of a German noun from its raw character-level representation. Several RNN and MLP models of different architecture were trained and evaluated manually (by entering "words") and automatically (by randomly generated "words"). RNN input is one-hot representation of subsequent word characters at each time step. MLP input is concatenated one-hot vectors of all characters. The output of both model types is three-class softmax for three genders. The project is implemented using TensorFlow. Done in a team with [Rahul Bohare](https://github.com/bohare), [Mesut Kuscu](https://github.com/Mesut1992), and Aysim Toker.
+DeepGerman project is an attempt to infer the gender (masculine, feminine, or neutral) of a German noun from its raw character-level representation. Several RNN, CNN, and MLP models of different architecture were trained and evaluated manually (by entering "words") and automatically (by randomly generated "words"). RNN input is one-hot representation of subsequent word characters at each time step. CNN input is stacked one-hot vectors of word characters, on which 1D-convolution is done (along characters dimension). MLP input is concatenated one-hot vectors of all characters. The output of both model types is three-class softmax for three genders. The project is implemented using TensorFlow. Done in a team with [Rahul Bohare](https://github.com/bohare), [Mesut Kuscu](https://github.com/Mesut1992), and Aysim Toker.
 
 Runnable scripts:
 * **rnn_deep_german.py** - configurable RNN trainer (CL arguments specified in the script).
+* **cnn_deep_german.py** - configurable CNN trainer (CL arguments specified in the script).
 * **mlp_deep_german.py** - configurable MLP trainer (CL arguments specified in the script).
 * **evaluate_manual.py** - manual model evaluation by entering a word and observing the inferred gender probabilities.
 * **evaluate_auto.py** - automatic model evaluation by generating multiple random words of variable length with fixed endings corresponding to a given gender (e.g. "-ung" for feminine) and observing the statistics of inferred gender classes for each ending.
@@ -18,7 +19,6 @@ masculine endings
 -eich      89.94     0.15      9.91      
 -ig        75.64     0.10      24.26     
 -eig       75.27     0.25      24.48     
--ling      53.68     0.06      46.26     
 -or        83.17     2.13      14.70     
 -us        91.32     2.92      5.76      
 -ismus     100.00    0.00      0.00      
@@ -27,16 +27,11 @@ feminine endings
 -------------------------------------
 -anz       22.27     76.52     1.21      
 -e         18.22     75.42     6.36      
--ei        28.23     39.34     32.43     
 -enz       4.03      93.92     2.05      
 -heit      10.33     89.29     0.38      
 -ie        6.68      90.36     2.96      
--ik        22.29     67.71     10.00     
--keit      46.30     53.56     0.14      
 -schaft    2.46      97.22     0.32      
 -sion      0.08      98.62     1.30      
--sis       5.16      68.50     26.34     
--tion      0.78      97.34     1.88      
 -tät       6.87      85.96     7.17      
 -ung       7.38      91.13     1.49      
 -ur        35.58     59.64     4.78      
